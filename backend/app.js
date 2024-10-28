@@ -1,29 +1,50 @@
-const express = require('express')
-const mongoose = require('mongoose')
-const morgan = require('morgan')
-const bodyParser = require('body-parser')
-const errorHandler = require('./middleware/error')
-
-require('dotenv').config()
-var cors = require('cors')
-const cookieParser = require('cookie-parser')
+const express = require("express");
 const app = express();
+const mongoose = require("mongoose");
+const morgan = require("morgan");
+const bodyParser = require("body-parser");
+require("dotenv").config();
+var cors = require('cors');
 
-//DB
-mongoose.connect(process.env.DATABASE).then(()=>console.log('Db connected')).catch((err)=>  console.log(err))
 
-//middleware
-app.use(morgan('dev'))
-app.use(bodyParser.json({limit: '5mb'}))
+
+
+// import routes
+const authRoutes = require('./routes/authRoutes');
+
+const cookieParser = require("cookie-parser");
+const errorHandler = require("./middleware/error");
+
+//database connection
+mongoose.connect(process.env.DATABASE, {
+    
+})
+    .then(() => console.log("DB connected"))
+    .catch((err) => console.log(err));
+
+//MIDDLEWARE
+app.use(morgan('dev'));
+app.use(bodyParser.json({ limit: "5mb" }));
 app.use(bodyParser.urlencoded({
-    limit: '5mb',
+    limit: "5mb",
     extended: true
-}))
-app.use(cookieParser())
-app.use(cors())
+}));
+app.use(cookieParser());
+app.use(cors());
 
-const port = process.env.PORT || 8000
+
+//ROUTES MIDDLEWARE
+// app.get('/', (req, res) => {
+//     res.send("Hello from Node Js");
+// })
+app.use('/api', authRoutes);
+
+// error middleware
+app.use(errorHandler);
+
+//port
+const port = process.env.PORT || 9000
 
 app.listen(port, () => {
-    console.log(`server running on port ${port}`)
-})
+    console.log(`Server running on port ${port}`);
+});
